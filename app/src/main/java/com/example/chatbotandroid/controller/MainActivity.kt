@@ -18,7 +18,7 @@ import java.net.URI
 class MainActivity : AppCompatActivity() {
     private lateinit var adapter: ChatAdapter
     private lateinit var webSocketClient: WebSocketClient
-    private val webSocketUri: URI? = URI("ws://10.0.2.2:8080/chat")
+    private val webSocketUri: URI? = URI(Constants.WEB_SOCKET_URL)
 
     //Life-cycle methods
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,24 +45,20 @@ class MainActivity : AppCompatActivity() {
         webSocketClient.connect()
     }
 
-    private fun createWebSocketClient(coinbaseUri: URI?) {
-        println("createws")
-        webSocketClient = object : WebSocketClient(coinbaseUri) {
+    private fun createWebSocketClient(wsURI: URI?) {
+        webSocketClient = object : WebSocketClient(wsURI) {
             override fun onOpen(handshakedata: ServerHandshake?) {
-                println("onOpen")
-
+                println("Websocket connection open")
             }
             override fun onMessage(message: String?) {
                 if (message != null) {
-                    addBotResponse(message)
+                    appendServerResponse(message)
                 }
             }
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
-                println("onClose")
                 println(reason)
             }
             override fun onError(ex: Exception?) {
-                println("onError")
                 println(ex)
             }
         }
@@ -74,13 +70,6 @@ class MainActivity : AppCompatActivity() {
         send_button.setOnClickListener {
             sendMessage()
         }
-    }
-
-    private fun recyclerView() {
-        adapter = ChatAdapter()
-        recycler_view_chat.adapter = adapter
-        recycler_view_chat.layoutManager = LinearLayoutManager(applicationContext)
-
     }
 
     private fun sendMessage() {
@@ -96,18 +85,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun addBotResponse(message: String) {
+    private fun appendServerResponse(message: String) {
         GlobalScope.launch {
             //Simulate network latency
             delay(500)
+            //Insert message in a non-blocking coroutine
             withContext(Dispatchers.Main) {
-                //Inserts sender message
+                //Inserts server message
                 adapter.insertMessage(Message(message, Constants.RECEIVE_TYPE, Time.timeStamp()))
-
                 //Scroll to the position of the latest message
                 recycler_view_chat.scrollToPosition(adapter.itemCount - 1)
             }
         }
     }
 
+    private fun recyclerView() {
+        adapter = ChatAdapter()
+        recycler_view_chat.adapter = adapter
+        recycler_view_chat.layoutManager = LinearLayoutManager(applicationContext)
+
+    }
 }

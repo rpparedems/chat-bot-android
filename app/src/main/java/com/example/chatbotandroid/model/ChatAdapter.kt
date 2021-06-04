@@ -9,8 +9,6 @@ import com.example.chatbotandroid.utils.Constants
 import kotlinx.android.synthetic.main.message_item.view.*
 
 class ChatAdapter: RecyclerView.Adapter<ChatAdapter.MessageViewHolder>() {
-
-    //Hold list of all messages
     var messages = mutableListOf<Message>()
 
     inner class MessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -49,6 +47,7 @@ class ChatAdapter: RecyclerView.Adapter<ChatAdapter.MessageViewHolder>() {
 
     fun insertMessage(message: Message) {
         this.messages.add(message)
+        //Notify observers of item change
         notifyItemInserted(messages.size)
     }
 }
